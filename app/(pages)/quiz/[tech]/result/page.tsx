@@ -14,7 +14,7 @@ const page = async ({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
     const { tech } = await params;
-    const { user, totalQuestions } = await searchParams;
+    const { user } = await searchParams;
 
     const supabase = await createClient();
 
@@ -36,16 +36,19 @@ const page = async ({
     console.log(myResult, error);
 
     const correctAns = myResult?.filter((result) => {
-        const correctAnswer = result.questions?.answers?.find(
+        // Access the first question in the questions array
+        const question = result.questions?.[0];
+        const correctAnswer = question?.answers?.find(
             (answer) => answer.is_correct
         );
         return correctAnswer?.id === result.selected_answer;
     });
 
-    const score = correctAns.reduce(
-        (acc, curr) => acc + curr.questions.weight,
+    const score = correctAns?.reduce(
+        (acc, curr) => acc + (curr.questions?.[0]?.weight || 0),
         0
     );
+
     return (
         <div className="py-24 px-8">
             <Title>Your Quiz Results</Title>
@@ -55,14 +58,14 @@ const page = async ({
                         Answered Questions
                     </Title>
 
-                    <Paragraph size="small">{myResult.length}</Paragraph>
+                    <Paragraph size="small">{myResult?.length}</Paragraph>
                 </Card>
                 <Card className="p-6">
                     <Title variant="h3" className=" mb-2">
                         Correct Answers
                     </Title>
 
-                    <Paragraph size="small">{correctAns.length}</Paragraph>
+                    <Paragraph size="small">{correctAns?.length}</Paragraph>
                 </Card>
                 <Card className="p-6">
                     <Title variant="h3" className=" mb-2">
@@ -72,7 +75,7 @@ const page = async ({
                     <Paragraph size="small">{score}</Paragraph>
                 </Card>
             </Grid>
-            {myResult && myResult.length > 0 ? (
+            {/* {myResult && myResult.length > 0 ? (
                 <div>
                     {myResult.map((result) => (
                         <div key={result.id}>
@@ -92,22 +95,6 @@ const page = async ({
                                 )}
                                 isResultView={true}
                             />
-                            <Title variant="h4" className="mt-4">
-                                Correct Answer:
-                            </Title>
-                            <Paragraph>
-                                {
-                                    result.questions?.answers?.find(
-                                        (answer) => answer.is_correct
-                                    )?.name
-                                }
-                            </Paragraph>
-                            <Paragraph>
-                                Reason: Lorem ipsum dolor sit amet consectetur
-                                adipisicing elit. Delectus, veniam repudiandae.
-                                Non commodi rerum nam ipsa dolorem ex quaerat
-                                odit.
-                            </Paragraph>
                         </div>
                     ))}
                 </div>
@@ -117,7 +104,7 @@ const page = async ({
                         No results found.
                     </Paragraph>
                 </div>
-            )}
+            )} */}
         </div>
     );
 };

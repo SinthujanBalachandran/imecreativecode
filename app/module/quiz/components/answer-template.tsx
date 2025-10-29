@@ -25,9 +25,9 @@ const AnswerTemplate = ({
     const totalQuestions = parseInt(searchParams.get("totalQuestions") || "0");
     const isNew = searchParams.get("isNew");
     const user = searchParams.get("user");
-    const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>(
-        undefined
-    );
+    const [selectedAnswer, setSelectedAnswer] = useState<
+        number | string | undefined
+    >(undefined);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {

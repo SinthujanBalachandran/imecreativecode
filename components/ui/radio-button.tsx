@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 import React from "react";
 
 interface RadioButtonProps {
-    id: string;
+    id: string | number;
     name: string;
-    value: string;
+    value: string | number;
     label: string;
     checked?: boolean;
-    onChange?: (value: string) => void;
+    onChange?: (value: string | number) => void;
     isCorrect?: boolean;
     isResultView?: boolean;
 }
@@ -41,7 +41,7 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
         >
             <input
                 type="radio"
-                id={id}
+                id={id.toString()}
                 name={name}
                 value={value}
                 checked={checked}
@@ -49,7 +49,7 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
                 className="w-5 h-5 "
                 disabled={isResultView}
             />
-            <label className="w-full " htmlFor={id}>
+            <label className="w-full " htmlFor={id as string}>
                 {label} {isCorrect ? " (Correct Answer)" : ""} {id}
             </label>
         </div>
@@ -59,13 +59,13 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
 interface RadioGroupProps {
     name: string;
     options: {
-        id: string;
-        value: string;
+        id: string | number;
+        value: string | number;
         label: string;
         isCorrect?: boolean;
     }[];
-    selectedValue?: string;
-    onChange?: (value: string) => void;
+    selectedValue?: string | number;
+    onChange?: (value: string | number) => void;
     isResultView?: boolean;
 }
 
