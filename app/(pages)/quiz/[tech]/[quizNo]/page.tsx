@@ -33,22 +33,16 @@ const page = async ({
         .eq("technology.name", tech)
         .single();
 
-    const { data: currentUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", user)
-        .single();
-
     const { data: myAnswer } = await supabase
         .from("user_answers")
         .select(
             "selected_answer,question,user(id),questions(id,name,technology(name))"
         )
         .eq("question", quiz?.id)
-        .eq("user", currentUser?.id);
-    console.log("myAnswer", myAnswer);
+        .eq("user", user);
+
     return (
-        <div className="py-24">
+        <div className="py-24 px-4 md:px-12">
             <Title>{tech} Quiz</Title>
             <Paragraph className="mt-4 text-2xl">
                 Question {quizNo} of {totalQuestions}
@@ -60,7 +54,7 @@ const page = async ({
             <AnswerTemplate
                 questionId={quiz?.id as number}
                 answers={quiz?.answers || []}
-                userId={currentUser?.id}
+                userId={user as string}
                 mySelectedAnswer={
                     myAnswer && myAnswer.length > 0
                         ? myAnswer[0].selected_answer

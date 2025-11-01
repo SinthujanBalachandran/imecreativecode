@@ -7,7 +7,12 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import ContinueFailedModal from "./continue-failed-modal";
 
-const ContinueForm = () => {
+interface Props {
+    tech: string;
+    totalQuestions: string;
+}
+
+const ContinueForm = ({ tech, totalQuestions }: Props) => {
     const router = useRouter();
     const [openModal, setOpenModal] = useState(false);
 
@@ -20,14 +25,22 @@ const ContinueForm = () => {
 
         const { data: users } = await supabase
             .from("users")
-            .select("id")
+            .select("id,user_answers(question)")
             .eq("email", email);
 
-        if (users && users.length > 0) {
+        const lastAnsweredQuestionNo =
+            Math.max(
+                ...(users?.[0]?.user_answers?.map((item) => item.question) ||
+                    [])
+            ) || 0;
+        if (users?.length === 0) {
             setOpenModal(true);
             return;
         }
-        router.push(`/quiz/HTML/1?user=${email}&isNewUser=false`);
+
+        router.push(
+            `/quiz/${tech}/${lastAnsweredQuestionNo}?user=${email}&totalQuestions=${totalQuestions}`
+        );
     };
 
     return (

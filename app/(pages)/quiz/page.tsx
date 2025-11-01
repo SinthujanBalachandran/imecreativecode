@@ -11,22 +11,20 @@ import Link from "next/link";
 const page = async () => {
     const supabase = await createClient();
 
-    const { data: frontendTechs } = await supabase
-        .from("technologies")
-        .select(
-            `
+    const { data: technologies } = await supabase.from("technologies").select(
+        `
             id,
             name,
-            tech_categories (
-                name
-            ),
+            category,
             questions(id)
             `
-        )
-        .eq("tech_categories.name", "Front End");
+    );
+    const frontendTechs = technologies?.filter(
+        (tech) => tech.category === "front-end"
+    );
 
     return (
-        <div className="py-24">
+        <div className="py-24 px-4  md:px-12">
             <Title variant="h1">iMe creative Quizzes</Title>
             <Paragraph className="mt-4">
                 Test your knowledge with our interactive quizzes on web

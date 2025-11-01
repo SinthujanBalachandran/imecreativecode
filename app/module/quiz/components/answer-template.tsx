@@ -7,10 +7,10 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 interface Props {
-    questionId: number;
-    answers: { id: number; name: string }[];
-    userId?: number;
-    mySelectedAnswer?: number;
+    questionId: string;
+    answers: { id: string; name: string }[];
+    userId?: string;
+    mySelectedAnswer?: string;
 }
 
 const AnswerTemplate = ({
@@ -23,19 +23,18 @@ const AnswerTemplate = ({
     const { tech, quizNo } = useParams();
     const searchParams = useSearchParams();
     const totalQuestions = parseInt(searchParams.get("totalQuestions") || "0");
-    const isNew = searchParams.get("isNew");
     const user = searchParams.get("user");
-    const [selectedAnswer, setSelectedAnswer] = useState<
-        number | string | undefined
-    >(undefined);
-    const [isLoading, setIsLoading] = useState(false);
+    const [selectedAnswer, setSelectedAnswer] = useState<string | undefined>(
+        undefined
+    );
+    const [isLoadingNext, setIsLoadingNext] = useState(false);
+    const [isLoadingFinish, setIsLoadingFinish] = useState(false);
 
     useEffect(() => {
         setSelectedAnswer(mySelectedAnswer);
     }, [mySelectedAnswer]);
-
+    console.log(selectedAnswer);
     const submitAnswer = async () => {
-        setIsLoading(true);
         const supabase = createClient();
         if (mySelectedAnswer) {
             await supabase
@@ -44,8 +43,8 @@ const AnswerTemplate = ({
                 .eq("question", questionId)
                 .eq("user", userId);
         }
-        console.log("selected ans", selectedAnswer);
-        const { data: userAnswer, error: userAnswerError } = await supabase
+
+        const { data: userAnswer } = await supabase
             .from("user_answers")
             .insert({
                 question: questionId,
@@ -54,12 +53,12 @@ const AnswerTemplate = ({
             })
             .select("id")
             .single();
-        console.log(userAnswerError);
-        setIsLoading(false);
+
         return { data: userAnswer };
     };
 
     const handleNext = async () => {
+        setIsLoadingNext(true);
         const { data } = await submitAnswer();
         if (
             data?.id &&
@@ -70,29 +69,32 @@ const AnswerTemplate = ({
             router.push(
                 `/quiz/${tech}/${
                     parseInt(quizNo as string) + 1
-                }?user=${user}&isNew=${isNew}&totalQuestions=${totalQuestions}`
+                }?user=${user}&totalQuestions=${totalQuestions}`
             );
         }
+        setIsLoadingNext(false);
     };
     const handlePrev = () => {
         if (quizNo && parseInt(quizNo as string) > 1) {
             router.push(
                 `/quiz/${tech}/${
                     parseInt(quizNo as string) - 1
-                }?user=${user}&isNew=${isNew}&totalQuestions=${totalQuestions}`
+                }?user=${user}&totalQuestions=${totalQuestions}`
             );
         }
     };
     const handleFinish = async () => {
+        setIsLoadingFinish(true);
         if (selectedAnswer) {
             await submitAnswer();
         }
 
         router.push(
-            `/quiz/${tech}/result?user=${user}&isNew=${isNew}&totalQuestions=${totalQuestions}`
+            `/quiz/${tech}/result?user=${user}&totalQuestions=${totalQuestions}`
         );
+        setIsLoadingFinish(false);
     };
-    console.log(answers);
+
     return (
         <div>
             <RadioGroup
@@ -106,18 +108,22 @@ const AnswerTemplate = ({
                 onChange={(e) => setSelectedAnswer(e)}
             />
             <Flex className="justify-between mt-8">
-                <Flex className="justify-between gap-4">
+                <div>
                     {parseInt(quizNo as string) > 1 && (
                         <Button onClick={handlePrev}>Previous</Button>
                     )}
+                </div>
+                <div>
                     {totalQuestions > parseInt(quizNo as string) && (
-                        <Button loading={isLoading} onClick={handleNext}>
+                        <Button loading={isLoadingNext} onClick={handleNext}>
                             Next
                         </Button>
                     )}
-                </Flex>
-                <Button loading={isLoading} onClick={handleFinish}>
-                    Finish
+                </div>
+            </Flex>
+            <Flex className="mt-10 justify-center">
+                <Button loading={isLoadingFinish} onClick={handleFinish}>
+                    Finish Quiz
                 </Button>
             </Flex>
         </div>

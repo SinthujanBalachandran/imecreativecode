@@ -17,7 +17,7 @@ interface Props {
 const StartForm = ({ tech, totalQuestions }: Props) => {
     const router = useRouter();
     const [openModal, setOpenModal] = useState(false);
-    const [email, setEmail] = useState<string>("");
+    const [user, setUser] = useState<{ id: string } | null>(null);
 
     const supabase = createClient();
 
@@ -34,7 +34,7 @@ const StartForm = ({ tech, totalQuestions }: Props) => {
             .eq("email", email);
 
         if (users && users.length > 0) {
-            setEmail(email as string);
+            setUser(users[0]);
             setOpenModal(true);
             return;
         }
@@ -50,23 +50,29 @@ const StartForm = ({ tech, totalQuestions }: Props) => {
             .single();
 
         router.push(
-            `/quiz/${tech}/1?user=${newUser?.email}&totalQuestions=${totalQuestions}`
+            `/quiz/${tech}/1?user=${newUser?.id}&totalQuestions=${totalQuestions}`
         );
     };
 
-    const handleExit = () => {
-        // delete answers associated with the email
-        setOpenModal(false);
+    const handleExit = async () => {
+        const { error } = await supabase
+            .from("user_answers")
+            .delete()
+            .eq("user", user?.id);
+
+        if (error) {
+            return;
+        }
         router.push(
-            `/quiz/${tech}/1?user=${email}&totalQuestions=${totalQuestions}`
+            `/quiz/${tech}/1?user=${user?.id}&totalQuestions=${totalQuestions}`
         );
+        setOpenModal(false);
     };
 
     const handleOk = () => {
         setOpenModal(false);
-        // find last question answered by the user
         router.push(
-            `/quiz/${tech}/1?user=${email}&totalQuestions=${totalQuestions}`
+            `/quiz/${tech}/1?user=${user?.id}&totalQuestions=${totalQuestions}`
         );
     };
 
