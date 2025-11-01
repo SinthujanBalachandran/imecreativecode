@@ -27,24 +27,34 @@ const page = async ({
         .eq("questions.technology.name", tech);
 
     const sortedResult = myResult?.slice().sort((a, b) => {
-        const aNo = a.questions?.question_no ?? 0;
-        const bNo = b.questions?.question_no ?? 0;
+        const aQuestion = Array.isArray(a.questions)
+            ? a.questions[0]
+            : a.questions;
+        const bQuestion = Array.isArray(b.questions)
+            ? b.questions[0]
+            : b.questions;
+        const aNo = aQuestion?.question_no ?? 0;
+        const bNo = bQuestion?.question_no ?? 0;
         return aNo - bNo;
     });
     console.log(myResult);
     const correctAns = myResult?.filter((result) => {
         // Access the first question in the questions array
-        const question = result.questions;
+        const question = Array.isArray(result.questions)
+            ? result.questions[0]
+            : result.questions;
         const correctAnswer = question?.answers?.find(
             (answer) => answer.is_correct
         );
         return correctAnswer?.id === result.selected_answer;
     });
 
-    const score = correctAns?.reduce(
-        (acc, curr) => acc + (curr.questions?.weight || 0),
-        0
-    );
+    const score = correctAns?.reduce((acc, curr) => {
+        const question = Array.isArray(curr.questions)
+            ? curr.questions[0]
+            : curr.questions;
+        return acc + (question?.weight || 0);
+    }, 0);
 
     return (
         <div className="py-24 px-4 md:px-12">
@@ -82,22 +92,34 @@ const page = async ({
                                 size="large"
                                 className="mt-10 font-semibold"
                             >
-                                Question No: {result.questions?.question_no}
+                                Question No:{" "}
+                                {
+                                    (Array.isArray(result.questions)
+                                        ? result.questions[0]
+                                        : result.questions
+                                    )?.question_no
+                                }
                             </Paragraph>
                             <Paragraph size="large" className="mb-5 mt-2">
-                                {result.questions?.name}
+                                {
+                                    (Array.isArray(result.questions)
+                                        ? result.questions[0]
+                                        : result.questions
+                                    )?.name
+                                }
                             </Paragraph>
                             <RadioGroup
                                 name="quiz-question"
                                 selectedValue={result.selected_answer}
-                                options={result?.questions?.answers?.map(
-                                    (answer) => ({
-                                        id: answer.id,
-                                        value: answer.id,
-                                        label: answer.name,
-                                        isCorrect: answer.is_correct,
-                                    })
-                                )}
+                                options={(Array.isArray(result.questions)
+                                    ? result.questions[0]
+                                    : result.questions
+                                )?.answers?.map((answer) => ({
+                                    id: answer.id,
+                                    value: answer.id,
+                                    label: answer.name,
+                                    isCorrect: answer.is_correct,
+                                }))}
                                 isResultView={true}
                             />
                             <p className="mt-2 font-semibold block md:hidden">
@@ -105,7 +127,10 @@ const page = async ({
                             </p>
                             <p className="block md:hidden">
                                 {
-                                    result.questions?.answers?.find(
+                                    (Array.isArray(result.questions)
+                                        ? result.questions[0]
+                                        : result.questions
+                                    )?.answers?.find(
                                         (answer) => answer.is_correct
                                     )?.name
                                 }

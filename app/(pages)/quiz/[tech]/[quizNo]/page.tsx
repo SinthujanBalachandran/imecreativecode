@@ -52,7 +52,7 @@ const page = async ({
                 {quiz?.name}
             </Paragraph>
             <AnswerTemplate
-                questionId={quiz?.id as number}
+                questionId={quiz?.id}
                 answers={quiz?.answers || []}
                 userId={user as string}
                 mySelectedAnswer={
