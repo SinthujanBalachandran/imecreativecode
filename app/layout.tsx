@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -29,6 +29,7 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <GoogleTagManager gtmId="GTM-5GGGR978" />
+            <GoogleAnalytics gaId="G-GM3HHMRTE4" />
             <body className={`${geistSans.className} antialiased`}>
                 <ThemeProvider
                     attribute="class"

@@ -6,9 +6,21 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { createClient } from "@/lib/supabase/server";
 import React from "react";
 
-const BoardSmall: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => {
+const BoardSmall: React.FC<React.HTMLAttributes<HTMLDivElement>> = async (
+    props
+) => {
+    const supabase = await createClient();
+
+    const { data: userAnswers } = await supabase.from("user_answers").select(
+        `*,answers(*)
+                `
+    );
+
+    console.log(userAnswers);
+
     return (
         <div {...props}>
             <Table>
